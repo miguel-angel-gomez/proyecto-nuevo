@@ -253,10 +253,4 @@ function obtenertodaslasareas(PDO $pdo): array
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
-function obtenertodoslosestados(PDO $pdo): array
-{
-    $sql = "SELECT estado FROM user_ ORDER BY estado ASC";
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute();
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
+
