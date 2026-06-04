@@ -103,7 +103,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </div>
                     </form>
                     <div class="text-center mt-4">
-                        <a href="index.php" class="text-decoration-none text-muted small">
+                        <a href="../index.php" class="text-decoration-none text-muted small">
                             ← Volver al inicio
                         </a>
                     </div>
