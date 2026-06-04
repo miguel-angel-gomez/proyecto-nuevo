@@ -78,7 +78,6 @@ function calcularHorasTrabajadas(string $entrada, string $salida): float
     $dt1 = new DateTime($entrada);
     $dt2 = new DateTime($salida);
     $diff = $dt1->diff($dt2);
-
     $minutos = ($diff->days * 1440) + ($diff->h * 60) + $diff->i;
     return round($minutos / 60, 2);
 }
