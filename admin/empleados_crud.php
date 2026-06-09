@@ -113,9 +113,16 @@ if ($accion === "listar") {
             </div>
         <?php endif; ?>
         <?php if ($accion === 'listar'): ?>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="h4 fw-bold text-dark m-0">
+                    <i class="fa-solid fa-list text-dark me-2"></i>Empleados registrados
+                </h2>
+                <a href="dashboard.php" class="btn btn-outline-secondary shadow-sm">
+                    <i class="fa-solid fa-xmark me-1"></i> Volver al menú
+                </a>
+            </div>
             <div class="card shadow-sm">
                 <div class="card-body">
-                    <h2 class="h5">Empleados registrados</h2>
                     <div class="table-responsive">
                         <table class="table table-sm align-middle">
                             <thead>
@@ -175,7 +182,7 @@ if ($accion === "listar") {
                                 <?php endforeach; ?>
                             </tbody>
                         </table>
-                        <a href="dashboard.php" class="btn btn-outline-secondary"><i class="fa-solid fa-xmark me-1"></i> Volver al menu</a>
+
                     </div>
                 </div>
             </div>
@@ -234,6 +241,7 @@ if ($accion === "listar") {
             </div>
         <?php endif ?>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        <?php require_once __DIR__ . '/../includes/footer.php'; ?>
 </body>
 
 </html>

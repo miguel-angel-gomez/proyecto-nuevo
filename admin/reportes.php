@@ -24,7 +24,7 @@ if (isset($_GET['exportar']) && $_GET['exportar'] === 'csv') {
     header('Content-Disposition: attachment; filename="reporte_' . date('Ymd') . '.csv"');
     $out = fopen('php://output', 'w');
     fputcsv($out, ['ID', 'Documento', 'Nombre', 'Entrada', 'Salida', 'Horas']);
-    
+
     foreach ($asistencias as $f) {
         // Formateamos las horas en HH:MM para el documento CSV
         $horas = (float)($f['cantidad_horas'] ?? 0);
@@ -57,9 +57,13 @@ if (isset($_GET['exportar']) && $_GET['exportar'] === 'csv') {
 
 <body class="bg-light">
     <main class="container py-4">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h1 class="h3 mb-0">Reporte de asistencias</h1>
-            <a href="dashboard.php" class="btn btn-outline-secondary">Volver</a>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="h4 fw-bold text-dark m-0">
+                <i class="fa-solid fa-calendar-days text-success me-2"></i>Empleados registrados
+            </h2>
+            <a href="dashboard.php" class="btn btn-outline-secondary shadow-sm">
+                <i class="fa-solid fa-xmark me-1"></i> Volver al menú
+            </a>
         </div>
 
         <div class="card shadow-sm mb-3">
@@ -115,14 +119,14 @@ if (isset($_GET['exportar']) && $_GET['exportar'] === 'csv') {
                                         <td><?= limpiar((string) $f['nombre_completo']) ?></td>
                                         <td><?= limpiar((string) $f['fecha_hora_ent']) ?></td>
                                         <td><?= limpiar((string) ($f['fecha_hora_sal'] ?? '-')) ?></td>
-                                        
+
                                         <td>
-                                            <?php 
-                                                $horas = (float)$f['cantidad_horas'];
-                                                $h = floor($horas);
-                                                $m = round(($horas - $h) * 60);
-                                                echo sprintf('%02d:%02d', $h, $m); 
-                                            ?> 
+                                            <?php
+                                            $horas = (float)$f['cantidad_horas'];
+                                            $h = floor($horas);
+                                            $m = round(($horas - $h) * 60);
+                                            echo sprintf('%02d:%02d', $h, $m);
+                                            ?>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
@@ -135,4 +139,5 @@ if (isset($_GET['exportar']) && $_GET['exportar'] === 'csv') {
     </main>
     <?php require_once __DIR__ . '/../includes/footer.php'; ?>
 </body>
+
 </html>
