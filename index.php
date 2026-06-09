@@ -13,7 +13,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $documento = intval($_POST['documento']);
     $pin = intval($_POST['pin']);
 
-    // Buscar empleado
     $sql = "SELECT * FROM user_ WHERE documento = ? AND pin = ?";
     $stmt = $pdo->prepare($sql);
     $stmt->execute([$documento, $pin]);
@@ -21,34 +20,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $empleado = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($empleado) {
+        if (intval($empleado['estado'] !== 1)) {
+            $mensaje =  "El usuario se encuentra inactivo.";
+        } else {
+            $sql = "SELECT * FROM asistencias WHERE documento = ? AND fecha_hora_sal IS NULL ORDER BY id_asistencia DESC LIMIT 1";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([$documento]);
 
-        // Buscar si tiene una entrada sin salida
-        $sql = "SELECT * FROM asistencias WHERE documento = ? AND fecha_hora_sal IS NULL ORDER BY id_asistencia DESC LIMIT 1";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([$documento]);
+            $asistencia = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        $asistencia = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if ($asistencia) {
-            $sql = "UPDATE asistencias
+            if ($asistencia) {
+                $sql = "UPDATE asistencias
                     SET fecha_hora_sal = NOW(),
                         cantidad_horas = TIMESTAMPDIFF(MINUTE, fecha_hora_ent, NOW()) / 60
                     WHERE id_asistencia = ?";
 
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute([$asistencia['id_asistencia']]);
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute([$asistencia['id_asistencia']]);
 
-            $mensaje = "Salida registrada correctamente";
-        } else {
-
-            // Registrar entrada
-            $sql = "INSERT INTO asistencias (documento, fecha_hora_ent)
+                $mensaje = "Salida registrada correctamente";
+            } else {
+                $sql = "INSERT INTO asistencias (documento, fecha_hora_ent)
                     VALUES(?, NOW())";
 
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute([$documento]);
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute([$documento]);
 
-            $mensaje = "Entrada registrada correctamente";
+                $mensaje = "Entrada registrada correctamente";
+            }
         }
     } else {
         $mensaje = "Documento o PIN incorrecto";
@@ -56,19 +55,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 
-
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Control de Asistencia</title>
-
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-
     <style>
         body {
             min-height: 100vh;
@@ -127,7 +121,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     </style>
 </head>
-
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark bg-opacity-50 border-bottom border-secondary">
         <div class="container">
@@ -142,7 +135,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <?= $mensaje ?>
                 </div>
             <?php endif; ?>
-            <!-- IZQUIERDA -->
             <div class="col-lg-6 mb-4">
                 <div class="hero-card p-5 text-white h-100">
                     <span class="badge bg-dark border border-info text-info mb-3">Plataforma de Gestión</span>
@@ -150,8 +142,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <p class="lead text-light mt-3">
                         Gestiona el registro de asistencia de manera rápida,
                         segura y organizada desde una plataforma moderna diseñada
-                        para optimizar el control y seguimiento de aprendices.
-                    </p>
+                        para optimizar el control y seguimiento de aprendices. </p>
                     <hr class="border-secondary my-4">
                 </div>
             </div>
@@ -160,128 +151,59 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="logo-circle mb-3">
                         <i class="bi bi-person-check-fill"></i>
                     </div>
-                    <h3 class="text-center fw-bold mb-4">
-                        Registro de Asistencia
-                    </h3>
+                    <h3 class="text-center fw-bold mb-4"> Registro de Asistencia </h3>
                     <form method="POST">
                         <div class="mb-3">
-                            <label class="form-label">
-                                Documento
-                            </label>
+                            <label class="form-label"> Documento </label>
                             <div class="input-group">
-                                <span class="input-group-text">
-                                    <i class="bi bi-person-badge"></i>
-                                </span>
-                                <input
-                                    type="number"
-                                    name="documento"
-                                    class="form-control"
-                                    required>
+                                <span class="input-group-text"> <i class="bi bi-person-badge"></i> </span>
+                                <input type="number" name="documento" class="form-control" required>
                             </div>
                         </div>
                         <div class="mb-4">
-                            <label class="form-label">
-                                PIN
-                            </label>
+                            <label class="form-label"> PIN </label>
                             <div class="input-group">
-                                <span class="input-group-text">
-                                    <i class="bi bi-key"></i>
-                                </span>
-                                <input
-                                    type="password"
-                                    name="pin"
-                                    class="form-control"
-                                    required>
+                                <span class="input-group-text"> <i class="bi bi-key"></i> </span>
+                                <input type="password" name="pin" class="form-control" required>
                             </div>
                         </div>
-                        <button
-                            type="submit"
-                            class="btn btn-info w-100 btn-register">
-                            <i class="bi bi-check-circle-fill"></i>
-                            Registrar Asistencia
+                        <button type="submit" class="btn btn-info w-100 btn-register">
+                            <i class="bi bi-check-circle-fill"></i> Registrar Asistencia
                         </button>
                     </form>
                 </div>
             </div>
         </div>
-        <!-- TARJETAS -->
-
         <div class="row mt-5 g-4">
-
             <div class="col-md-4">
-
                 <div class="glass-card p-4 text-center text-white h-100">
-
                     <i class="bi bi-lightning-charge-fill text-warning feature-icon"></i>
-
-                    <h5 class="mt-3">
-                        Rápido
-                    </h5>
-
-                    <p>
-                        Registro inmediato sin procesos complejos.
-                    </p>
-
+                    <h5 class="mt-3"> Rápido </h5>
+                    <p>Registro inmediato sin procesos complejos. </p>
                 </div>
-
             </div>
-
             <div class="col-md-4">
-
                 <div class="glass-card p-4 text-center text-white h-100">
-
                     <i class="bi bi-shield-lock-fill text-info feature-icon"></i>
-
-                    <h5 class="mt-3">
-                        Seguro
-                    </h5>
-
-                    <p>
-                        Protección mediante autenticación y control.
-                    </p>
-
+                    <h5 class="mt-3"> Seguro </h5>
+                    <p> Protección mediante autenticación y control. </p>
                 </div>
-
             </div>
-
             <div class="col-md-4">
-
                 <div class="glass-card p-4 text-center text-white h-100">
-
                     <i class="bi bi-graph-up-arrow text-success feature-icon"></i>
-
-                    <h5 class="mt-3">
-                        Eficiente
-                    </h5>
-
-                    <p>
-                        Seguimiento y control centralizado.
-                    </p>
-
+                    <h5 class="mt-3"> Eficiente </h5>
+                    <p> Seguimiento y control centralizado. </p>
                 </div>
-
             </div>
-
         </div>
-
     </div>
-
     <footer class="border-top border-secondary text-center text-light py-4">
-
         <div class="container">
-
-            <p class="mb-1 fw-bold">
-                Control de Asistencia
-            </p>
-
-            <small class="text-secondary">
-                © 2026 Todos los derechos reservados
-            </small>
-
+            <p class="mb-1 fw-bold">Control de Asistencia </p>
+            <small class="text-secondary"> © 2026 Todos los derechos reservados </small>
         </div>
-
     </footer>
-
 </body>
 
 </html>

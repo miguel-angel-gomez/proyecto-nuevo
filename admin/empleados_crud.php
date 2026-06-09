@@ -1,6 +1,6 @@
 <?php
 session_start();
-
+date_default_timezone_set('America/Bogota');
 // Control de acceso para el administrador
 if (!isset($_SESSION['nombre_tipo']) || $_SESSION['nombre_tipo'] != 'admin') {
     header("Location: ../login.php");
@@ -29,35 +29,33 @@ if ($accion === 'listar') {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    // Guardar Empleado Nuevo
     if (isset($_POST['crear'])) {
         $documento = intval($_POST['documento']);
         $nombre = trim($_POST['nombre_completo']);
         $pin = intval($_POST['pin']);
-        $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
         $id_tipo = isset($_POST['id_tipo']) && $_POST['id_tipo'] !== '' ? intval($_POST['id_tipo']) : NULL;
         $fecha_creacion = date('Y-m-d H:i:s');
         $id_area = isset($_POST['id_area']) && $_POST['id_area'] !== '' ? intval($_POST['id_area']) : NULL;
         $estado = isset($_POST['estado']) ? intval($_POST['estado']) : 1;
 
         if ($nombre !== '' && $documento > 0) {
-            $id_nuevo = crearEmpleado($pdo, $documento, $nombre, $pin, $password, $id_tipo, $fecha_creacion, $id_area, $estado);
-            $mensaje = $id_nuevo ? "Empleado creado con éxito. Cédula: $documento" : "Error al insertar el registro.";
+            $id_nuevo = crearEmpleado($pdo, $documento, $nombre, $pin, $id_tipo, $fecha_creacion, $id_area, $estado);
+            if ($id_nuevo !== false) {
+                $mensaje = "Empleado creado con éxito. Cédula: $documento";
+            } else {
+                $mensaje = "Error al insertar el registro.";
+            }
         } else {
             $mensaje = "El documento y el nombre son campos obligatorios.";
         }
-    }
-
-    // Guardar Cambios de Edición
-    elseif (isset($_POST['actualizar'])) {
+    } elseif (isset($_POST['actualizar'])) {
         $documento = intval($_POST['documento']);
         $nombre = trim($_POST['nombre_completo']);
-        $id_tipo = intval($_POST['id_tipo']);
         $id_area = intval($_POST['id_area']);
         $estado = intval($_POST['estado']);
 
         if ($documento > 0 && $nombre !== '') {
-            $ok = editarEmpleado($pdo, $documento, $nombre, $id_tipo, $id_area, $estado);
+            $ok = editarEmpleado($pdo, $documento, $nombre, $id_area, $estado);
             if ($ok) {
                 $empleados = obtenerEmpleados($pdo);
                 $mensaje = "Empleado actualizado correctamente.";
@@ -94,7 +92,6 @@ if ($accion === "listar") {
     $asistencias = obtenerReporteAsistencias($pdo);
 }
 
-
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -102,7 +99,7 @@ if ($accion === "listar") {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CRUD Empleados</title>
+    <title>Gestion de empleados</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 </head>
@@ -128,6 +125,7 @@ if ($accion === "listar") {
                                     <th>Tipo</th>
                                     <th>Area</th>
                                     <th>Estado</th>
+                                    <th>Fecha de creación</th>
                                     <th>Acciones</th>
                                 </tr>
                             </thead>
@@ -139,28 +137,14 @@ if ($accion === "listar") {
                                                 <?= htmlspecialchars($emp['documento']) ?>
                                                 <input type="hidden" name="documento" value="<?= $emp['documento'] ?>">
                                             </td>
-
                                             <td>
-                                                <input
-                                                    type="text"
-                                                    name="nombre_completo"
-                                                    class="form-control form-control-sm"
-                                                    value="<?= htmlspecialchars($emp['nombre_completo']) ?>"
-                                                    required>
+                                                <input type="text" name="nombre_completo" class="form-control form-control-sm"
+                                                    value="<?= htmlspecialchars($emp['nombre_completo']) ?>" required>
                                             </td>
-
                                             <td>
-                                                <select class="form-select form-select-sm" name="id_tipo" required>
-                                                    <?php foreach ($tipo_usuario as $tipo): ?>
-                                                        <option
-                                                            value="<?= $tipo['id_tipo'] ?>"
-                                                            <?= ($emp['id_tipo'] == $tipo['id_tipo']) ? 'selected' : '' ?>>
-                                                            <?= htmlspecialchars($tipo['nombre_tipo']) ?>
-                                                        </option>
-                                                    <?php endforeach; ?>
-                                                </select>
+                                                <?= htmlspecialchars($emp['nombre_tipo']) ?>
+                                                <input type="hidden" name="nombre_tipo" value="<?= $emp['nombre_tipo'] ?>">
                                             </td>
-
                                             <td>
                                                 <select class="form-select form-select-sm" name="id_area" required>
                                                     <?php foreach ($area_usu as $area): ?>
@@ -172,26 +156,18 @@ if ($accion === "listar") {
                                                     <?php endforeach; ?>
                                                 </select>
                                             </td>
-
                                             <td>
                                                 <select class="form-select form-select-sm" name="estado">
-                                                    <option value="1" <?= ($emp['estado'] == 1) ? 'selected' : '' ?>>
-                                                        Activo
-                                                    </option>
-                                                    <option value="0" <?= ($emp['estado'] == 0) ? 'selected' : '' ?>>
-                                                        Inactivo
-                                                    </option>
+                                                    <option value="1" <?= ($emp['estado'] == 1) ? 'selected' : '' ?>> Activo</option>
+                                                    <option value="0" <?= ($emp['estado'] == 0) ? 'selected' : '' ?>> Inactivo</option>
                                                 </select>
                                             </td>
-
+                                            <td>
+                                                <?= htmlspecialchars($emp['fecha_creacion']) ?>
+                                                <input type="hidden" name="fecha_creacion" value="<?= $emp['fecha_creacion'] ?>">
+                                            </td>
                                             <td class="d-flex gap-2">
-                                                <button
-                                                    type="submit"
-                                                    name="actualizar"
-                                                    class="btn btn-success btn-sm">
-                                                    Guardar
-                                                </button>
-
+                                                <button type="submit" name="actualizar" class="btn btn-success btn-sm"> Guardar </button>
                                                 <button type="submit" name="eliminar" class="btn btn-danger btn-sm" onclick="return confirm('¿Desea eliminar este empleado?')"> Eliminar</button>
                                             </td>
                                         </form>
@@ -199,7 +175,7 @@ if ($accion === "listar") {
                                 <?php endforeach; ?>
                             </tbody>
                         </table>
-                        <a href="dashboard.php" class="btn btn-secondary"><i class="fa-solid fa-xmark me-1"></i> Volver al menu</a>
+                        <a href="dashboard.php" class="btn btn-outline-secondary"><i class="fa-solid fa-xmark me-1"></i> Volver al menu</a>
                     </div>
                 </div>
             </div>
@@ -209,35 +185,31 @@ if ($accion === "listar") {
                     <h2 class="card-title mb-4 fw-bold text-success"><i class="fa-solid fa-user-plus me-2"></i>Registrar Empleado</h2>
                     <form method="POST" autocomplete="off">
                         <div class="row">
-                            <div class="col-md-6 mb-3">
+                            <div class=" mb-3">
                                 <label class="form-label fw-semibold">Cédula / Documento</label>
                                 <input type="number" name="documento" required class="form-control" placeholder="Número de identificación">
                             </div>
-                            <div class="col-md-6 mb-3">
+                            <div class=" mb-3">
                                 <label class="form-label fw-semibold">Nombre Completo</label>
                                 <input type="text" name="nombre_completo" required class="form-control" placeholder="Ej: Juan Pérez">
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-semibold">PIN de Marcado (Ingreso físico)</label>
+                            <div class=" mb-3">
+                                <label class="form-label fw-semibold">PIN de ingreso</label>
                                 <input type="password" name="pin" required class="form-control" placeholder="4 dígitos numéricos" maxlength="4">
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-semibold">Contraseña para el Sistema Web</label>
-                                <input type="password" name="password" required class="form-control" placeholder="Establezca una contraseña">
-                            </div>
+
                         </div>
                         <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-semibold">ID Tipo de Usuario (Rol)</label>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Rol</label>
                                 <select name="id_tipo" class="form-select">
                                     <option value="">Sin seleccionar</option>
-                                    <option value="1">Admin</option>
                                     <option value="2">Empleado</option>
                                 </select>
                             </div>
-                            <div class="col-md-6 mb-3">
+                            <div class="mb-3">
                                 <label class="form-label fw-semibold">Área</label>
                                 <select name="id_area" class="form-select" required>
                                     <option value="">Seleccione un área</option>
@@ -255,7 +227,6 @@ if ($accion === "listar") {
                                 <option value="0">Inactivo</option>
                             </select>
                         </div>
-
                         <button type="submit" name="crear" class="btn btn-success fw-bold px-4"><i class="fa-solid fa-floppy-disk me-1"></i> Guardar</button>
                         <a href="dashboard.php" class="btn btn-outline-secondary"><i class="fa-solid fa-xmark me-1"></i> Cancelar</a>
                     </form>

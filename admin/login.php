@@ -1,15 +1,12 @@
 <?php
-// Iniciar sesión al principio para que las redirecciones funcionen
 session_start();
 
 require_once __DIR__ . '/../config/db.php';
 
-// Cabeceras de seguridad y caché
 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
 header("Cache-Control: post-check=0, pre-check=0", false);
 header("Pragma: no-cache");
 
-// Redirección si ya hay sesión activa
 if (isset($_SESSION['nombre_tipo'])) {
     $rol = $_SESSION['nombre_tipo'];
     $rutas = ['admin' => 'dashboard.php'];
@@ -21,8 +18,8 @@ $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $documento = intval($_POST['documento']);
-    $pin = intval($_POST['pin']);
-    $password = $_POST['password'];
+    $pin       = trim($_POST['pin']);
+    $password  = $_POST['password'];
 
     if (empty($documento) || empty($pin) || empty($password)) {
         $error = 'Todos los campos son obligatorios';
@@ -30,18 +27,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             $db = new Database();
             $pdo = $db->conectar();
-
-            // Validamos Documento y PIN en la consulta
             $sql = 'SELECT u.documento, u.nombre_completo, u.pin, u.password, t.nombre_tipo, t.id_tipo 
                     FROM user_ u 
                     INNER JOIN tipo_usuario t ON u.id_tipo = t.id_tipo 
-                    WHERE u.documento = ? AND u.pin = ?';
+                    WHERE u.documento = ?';
 
             $stmt = $pdo->prepare($sql);
-            $stmt->execute([$documento, $pin]);
+            $stmt->execute([$documento]);
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            if ($user && password_verify($password, $user['password'])) {
+            if ($user && password_verify($pin, $user['pin']) && password_verify($password, $user['password'])) {
+
                 session_regenerate_id(true);
                 $_SESSION['documento'] = $user['documento'];
                 $_SESSION['nombre_completo'] = $user['nombre_completo'];
@@ -64,14 +60,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login Admin - Bootstrap Only</title>
+    <title>Iniciar sesión</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-
 <body class="bg-light">
     <div class="container vh-100 d-flex align-items-center justify-content-center">
         <div class="col-12 col-sm-8 col-md-6 col-lg-4">
@@ -80,7 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <h2 class="text-center fw-bold mb-4 text-primary">INICIAR SESIÓN</h2>
                     <?php if ($error != ""): ?>
                         <div class="alert alert-danger py-2 small text-center" role="alert">
-                            <?php echo $error; ?>
+                            <?php echo htmlspecialchars($error); ?>
                         </div>
                     <?php endif; ?>
                     <form method="POST">
@@ -90,7 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-medium">PIN</label>
-                            <input type="password" name="pin" class="form-control" placeholder="Ingrese PIN" required>
+                            <input type="password" name="pin" maxlength="4" class="form-control" placeholder="Ingrese PIN" required>
                         </div>
                         <div class="mb-4">
                             <label class="form-label fw-medium">Contraseña</label>
@@ -103,14 +97,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </div>
                     </form>
                     <div class="text-center mt-4">
-                        <a href="../index.php" class="text-decoration-none text-muted small">
-                            ← Volver al inicio
-                        </a>
+                        <a href="../index.php" class="text-decoration-none text-muted small"> ← Volver al inicio </a>
                     </div>
-
                 </div>
             </div>
         </div>
     </div>
 </body>
+
 </html>

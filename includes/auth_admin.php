@@ -1,18 +1,19 @@
 <?php
+date_default_timezone_set('America/Bogota');
 if (php_sapi_name() !== 'cli') {
     die("Este script solo puede ejecutarse desde la terminal.\n");
 }
 
 require_once __DIR__ . '/../config/db.php';
 
-if ($argc < 7) {
+if ($argc < 8) {
     echo "Uso: php crear_admin.php <email> <password> <id_tipo_user>\n";
     exit(1);
 }
 
 $documento = $argv[1];
-$nombre = $argv[2];
-$pin = $argv[3];
+$pin = $argv[2];
+$nombre = $argv[3];
 $password = $argv[4];
 $id_tipo = (int)$argv[5];
 $id_area = (int)$argv[6];
@@ -22,12 +23,12 @@ if (!FILTER_VAR($documento, FILTER_VALIDATE_INT)) {
     echo " Documento invalido \n";
     exit(1);
 }
-if (strlen($pin) >4 && strlen($pin) <4) {
+if (strlen($pin) !==4) {
     echo " El pin debe ser de 4 digitos. \n";
     exit(1);
 }
 if (strlen($password) < 10) {
-    echo " La contraseña debe tener minimo 8 caracteres. \n";
+    echo " La contraseña debe tener minimo 10 caracteres. \n";
     exit(1);
 }
 try {
@@ -42,8 +43,8 @@ try {
     }
     $hash = password_hash($password, PASSWORD_ARGON2ID);
     $pin_hash = password_hash($pin, PASSWORD_ARGON2ID);
-    $insert = $pdo->prepare("INSERT INTO user_ (documento,nombre_completo,pin,password,id_tipo,id_area,estado) VALUES (?,?,?,?,?,?,?)");
-    $insert->execute([$documento, $nombre, $pin_hash, $hash, $id_tipo, $id_area, $estado]);
+    $insert = $pdo->prepare("INSERT INTO user_ (documento, pin, nombre_completo, password, id_tipo, id_area, estado) VALUES (?,?,?,?,?,?,?)");
+    $insert->execute([$documento, $pin_hash, $nombre, $hash, $id_tipo, $id_area, $estado]);
 
     echo "Administrador creado exitosamente.\n";
     echo "Documento: $documento | ID tipo: $id_tipo\n";
