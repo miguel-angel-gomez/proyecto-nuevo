@@ -41,9 +41,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (empty($pin_original) || !ctype_digit($pin_original)) {
             $mensaje = "El PIN es obligatorio y debe contener ÚNICAMENTE números.";
         } 
-        elseif (empty($documento) || !ctype_digit($documento)) {
-            $mensaje = "El documento es obligatorio y debe contener ÚNICAMENTE números.";
-        } 
         elseif ($nombre !== '' && $documento > 0) {
 
             $pin_encriptado = password_hash($pin_original, PASSWORD_BCRYPT);
