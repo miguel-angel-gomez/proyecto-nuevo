@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-
+// Control de acceso para el administrador
 if (!isset($_SESSION['nombre_tipo']) || $_SESSION['nombre_tipo'] != 'admin') {
     header("Location: ../login.php");
     exit();

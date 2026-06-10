@@ -80,15 +80,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <form method="POST">
                         <div class="mb-3">
                             <label class="form-label fw-medium">Documento</label>
-                            <input type="number" name="documento" class="form-control" placeholder="Ingrese documento" required>
+                            <input type="text" name="documento" class="form-control" placeholder="Ingrese documento" required maxlength="10" pattern="[0-9]{1,10}" inputmode="numeric" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-medium">PIN</label>
-                            <input type="password" name="pin" maxlength="4" class="form-control" placeholder="Ingrese PIN" required>
+                            <input type="password" name="pin" maxlength="4" class="form-control" placeholder="Ingrese PIN" required inputmode="numeric" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
                         </div>
                         <div class="mb-4">
                             <label class="form-label fw-medium">Contraseña</label>
-                            <input type="password" name="password" class="form-control" placeholder="Ingrese contraseña" required>
+                            <input type="password" name="password" class="form-control" placeholder="Ingrese contraseña" required maxlength="10">
                         </div>
                         <div class="d-grid">
                             <button type="submit" class="btn btn-primary fw-bold shadow-sm">

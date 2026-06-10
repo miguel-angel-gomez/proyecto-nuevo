@@ -11,17 +11,19 @@ if (!$pdo) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $documento = intval($_POST['documento']);
-    $pin = intval($_POST['pin']);
+    $pin = trim($_POST['pin']);
 
-    $sql = "SELECT * FROM user_ WHERE documento = ? AND pin = ?";
+    // ✅ Buscar solo por documento, luego verificar PIN con password_verify
+    $sql = "SELECT * FROM user_ WHERE documento = ?";
     $stmt = $pdo->prepare($sql);
-    $stmt->execute([$documento, $pin]);
+    $stmt->execute([$documento]);
 
     $empleado = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if ($empleado) {
-        if (intval($empleado['estado'] !== 1)) {
-            $mensaje =  "El usuario se encuentra inactivo.";
+    if ($empleado && password_verify($pin, $empleado['pin'])) {
+        // ✅ Bug corregido: paréntesis en el lugar correcto
+        if (intval($empleado['estado']) !== 1) {
+            $mensaje = "El usuario se encuentra inactivo.";
         } else {
             $sql = "SELECT * FROM asistencias WHERE documento = ? AND fecha_hora_sal IS NULL ORDER BY id_asistencia DESC LIMIT 1";
             $stmt = $pdo->prepare($sql);
@@ -50,6 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
     } else {
+        // ✅ Mensaje genérico sin revelar si el documento existe o no
         $mensaje = "Documento o PIN incorrecto";
     }
 }
@@ -157,14 +160,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <label class="form-label"> Documento </label>
                             <div class="input-group">
                                 <span class="input-group-text"> <i class="bi bi-person-badge"></i> </span>
-                                <input type="number" name="documento" class="form-control" required>
+                                <input type="text" name="documento" class="form-control" required maxlength="10" pattern="[0-9]{1,10}" inputmode="numeric" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
                             </div>
                         </div>
                         <div class="mb-4">
                             <label class="form-label"> PIN </label>
                             <div class="input-group">
                                 <span class="input-group-text"> <i class="bi bi-key"></i> </span>
-                                <input type="password" name="pin" class="form-control" required>
+                                <input type="password" name="pin" class="form-control" required maxlength="4" inputmode="numeric" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
                             </div>
                         </div>
                         <button type="submit" class="btn btn-info w-100 btn-register">

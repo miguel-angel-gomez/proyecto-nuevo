@@ -1,6 +1,8 @@
 <?php
+// ✅ En producción: desactivar display_errors, registrar en log
 error_reporting(E_ALL);
-ini_set('display_errors', 1);
+ini_set('display_errors', 0);
+ini_set('log_errors', 1);
 
 class Database
 {
@@ -27,12 +29,9 @@ class Database
             return $pdo;
             
         } catch(PDOException $e) {
-            // ✅ Mostrar error detallado en desarrollo
-            echo '<strong>Error de Conexión:</strong> ' . $e->getMessage();
-            echo '<br><strong>Código:</strong> ' . $e->getCode();
-            // En producción: registrar en log en lugar de mostrar
-            // error_log($e->getMessage());
-            exit;
+            // ✅ Registrar error en log, nunca mostrarlo al usuario
+            error_log('Error de conexión: ' . $e->getMessage());
+            die('Error de conexión con la base de datos. Contacte al administrador.');
         }
     }
 }

@@ -23,8 +23,8 @@ if (!FILTER_VAR($documento, FILTER_VALIDATE_INT)) {
     echo " Documento invalido \n";
     exit(1);
 }
-if (!ctype_digit($pin) || strlen($pin) !== 4) {
-    echo "El PIN debe contener exactamente 4 dígitos.\n";
+if (strlen($pin) !==4) {
+    echo " El pin debe ser de 4 digitos. \n";
     exit(1);
 }
 if (strlen($password) < 10) {

@@ -43,10 +43,14 @@ function crearEmpleado(PDO $pdo, int $documento, string $nombre, string $pin, ?i
     if ($stmtCheck->fetch()) {
         return false;
     }
+
+    // ✅ Hashear el PIN antes de guardarlo
+    $pin_hash = password_hash($pin, PASSWORD_ARGON2ID);
+
     $sql = "INSERT INTO user_ (documento, nombre_completo, pin, id_tipo, fecha_creacion, id_area, estado) VALUES (?, ?, ?, ?, ?, ?, ?)";
     $stmt = $pdo->prepare($sql);
     try {
-        return $stmt->execute([$documento, $nombre, $pin, $id_tipo, $fecha_creacion, $id_area, $estado]);
+        return $stmt->execute([$documento, $nombre, $pin_hash, $id_tipo, $fecha_creacion, $id_area, $estado]);
     } catch (PDOException $e) {
         die($e->getMessage());
     }

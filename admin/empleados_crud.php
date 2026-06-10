@@ -32,21 +32,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['crear'])) {
         $documento = intval($_POST['documento']);
         $nombre = trim($_POST['nombre_completo']);
-        $pin_original = trim($_POST['pin']);
+        $pin = trim($_POST['pin']); // ✅ String para poder hashear en crearEmpleado()
         $id_tipo = isset($_POST['id_tipo']) && $_POST['id_tipo'] !== '' ? intval($_POST['id_tipo']) : NULL;
         $fecha_creacion = date('Y-m-d H:i:s');
         $id_area = isset($_POST['id_area']) && $_POST['id_area'] !== '' ? intval($_POST['id_area']) : NULL;
         $estado = isset($_POST['estado']) ? intval($_POST['estado']) : 1;
 
-        if (empty($pin_original) || !ctype_digit($pin_original)) {
-            $mensaje = "El PIN es obligatorio y debe contener ÚNICAMENTE números.";
-        } 
-        elseif ($nombre !== '' && $documento > 0) {
-
-            $pin_encriptado = password_hash($pin_original, PASSWORD_BCRYPT);
-
-            $id_nuevo = crearEmpleado($pdo, $documento, $nombre, $pin_encriptado, $id_tipo, $fecha_creacion, $id_area, $estado);
-
+        if ($nombre !== '' && $documento > 0) {
+            $id_nuevo = crearEmpleado($pdo, $documento, $nombre, $pin, $id_tipo, $fecha_creacion, $id_area, $estado);
             if ($id_nuevo !== false) {
                 $mensaje = "Empleado creado con éxito. Cédula: $documento";
             } else {
@@ -211,8 +204,9 @@ if ($accion === "listar") {
                         <div class="row">
                             <div class=" mb-3">
                                 <label class="form-label fw-semibold">PIN de ingreso</label>
-                                <input type="password" name="pin" required class="form-control" placeholder="4 dígitos numéricos" maxlength="4">
+                                <input type="password" name="pin" required class="form-control" placeholder="4 dígitos numéricos" maxlength="4" inputmode="numeric" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
                             </div>
+
                         </div>
                         <div class="row">
                             <div class="mb-3">
