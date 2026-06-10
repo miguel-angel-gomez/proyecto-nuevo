@@ -35,7 +35,7 @@ function obtenerReporteAsistencias(PDO $pdo, ?string $fechaInicio = null, ?strin
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
-function crearEmpleado(PDO $pdo, int $documento, string $nombre, int $pin, ?int $id_tipo, string $fecha_creacion, ?int $id_area, int $estado) {
+function crearEmpleado(PDO $pdo, int $documento, string $nombre, string $pin, ?int $id_tipo, string $fecha_creacion, ?int $id_area, int $estado) {
     $sqlCheck = "SELECT documento FROM user_ WHERE documento = ?";
     $stmtCheck = $pdo->prepare($sqlCheck);
     $stmtCheck->execute([$documento]);
