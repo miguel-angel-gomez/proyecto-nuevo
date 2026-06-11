@@ -1,4 +1,5 @@
 <?php
+//final
 function limpiar(string $valor): string
 {
     return htmlspecialchars(trim($valor), ENT_QUOTES, 'UTF-8');
@@ -44,7 +45,6 @@ function crearEmpleado(PDO $pdo, int $documento, string $nombre, string $pin, ?i
         return false;
     }
 
-    // ✅ Hashear el PIN antes de guardarlo
     $pin_hash = password_hash($pin, PASSWORD_ARGON2ID);
 
     $sql = "INSERT INTO user_ (documento, nombre_completo, pin, id_tipo, fecha_creacion, id_area, estado) VALUES (?, ?, ?, ?, ?, ?, ?)";
@@ -67,24 +67,6 @@ function editarEmpleado(PDO $pdo, string $documento, string $nombre, int $id_are
     }
 }
 
-function buscarEmpleadoPorDocumento(PDO $pdo, string $documento): ?array
-{
-    try {
-        $sql = "SELECT u.documento, u.nombre_completo, u.id_tipo, u.id_area, t.nombre_tipo, a.nombre_area, u.estado
-                FROM user_ u
-                INNER JOIN tipo_usuario t ON u.id_tipo = t.id_tipo
-                INNER JOIN area a ON u.id_area = a.id_area
-                WHERE u.documento = ?";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([$documento]);
-        $empleado = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        return $empleado ?: null;
-    } catch (PDOException $e) {
-        error_log('Error buscarEmpleadoPorDocumento: ' . $e->getMessage());
-        return null;
-    }
-}
 
 function obtenertodoslostipos(PDO $pdo): array
 {
