@@ -32,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['crear'])) {
         $documento = intval($_POST['documento']);
         $nombre = trim($_POST['nombre_completo']);
-        $pin = trim($_POST['pin']); // ✅ String para poder hashear en crearEmpleado()
+        $pin = trim($_POST['pin']); 
         $id_tipo = isset($_POST['id_tipo']) && $_POST['id_tipo'] !== '' ? intval($_POST['id_tipo']) : NULL;
         $fecha_creacion = date('Y-m-d H:i:s');
         $id_area = isset($_POST['id_area']) && $_POST['id_area'] !== '' ? intval($_POST['id_area']) : NULL;
