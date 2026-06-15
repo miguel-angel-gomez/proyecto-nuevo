@@ -14,7 +14,7 @@ $pdo = $db->conectar();
 $fechaInicio = limpiar($_GET['fecha_inicio'] ?? '');
 $fechaFin    = limpiar($_GET['fecha_fin'] ?? '');
 
-// ✅ CORRECCIÓN: Se envían los parámetros para activar el filtro dinámico
+
 $asistencias = obtenerReporteAsistencias($pdo, $fechaInicio, $fechaFin);
 
 $total = round(array_sum(array_column($asistencias, 'cantidad_horas')), 2);
