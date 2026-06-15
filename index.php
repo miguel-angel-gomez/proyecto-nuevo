@@ -13,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $documento = intval($_POST['documento']);
     $pin = trim($_POST['pin']);
 
-    // ✅ Buscar solo por documento, luego verificar PIN con password_verify
+    
     $sql = "SELECT * FROM user_ WHERE documento = ?";
     $stmt = $pdo->prepare($sql);
     $stmt->execute([$documento]);
@@ -21,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $empleado = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($empleado && password_verify($pin, $empleado['pin'])) {
-        // ✅ Bug corregido: paréntesis en el lugar correcto
+        
         if (intval($empleado['estado']) !== 1) {
             $mensaje = "El usuario se encuentra inactivo.";
         } else {
@@ -52,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
     } else {
-        // ✅ Mensaje genérico sin revelar si el documento existe o no
+        
         $mensaje = "Documento o PIN incorrecto";
     }
 }
