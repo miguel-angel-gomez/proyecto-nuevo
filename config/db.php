@@ -29,7 +29,7 @@ class Database
             return $pdo;
             
         } catch(PDOException $e) {
-            // ✅ Registrar error en log, nunca mostrarlo al usuario
+           
             error_log('Error de conexión: ' . $e->getMessage());
             die('Error de conexión con la base de datos. Contacte al administrador.');
         }
